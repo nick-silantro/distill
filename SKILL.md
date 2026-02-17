@@ -1,6 +1,6 @@
 ---
 name: distill
-description: "Use when turning large bodies of knowledge (courses, workspaces, documentation, book notes, research) into structured, progressive-disclosure skills. Triggers on: create a skill from, distill into a skill, turn this into a skill, encyclopedia skill, knowledge extraction, skill from Tana, skill from course, skill from documentation."
+description: "Use when turning large bodies of knowledge (courses, workspaces, documentation, book notes, research) into structured, progressive-disclosure skills. Triggers on: create a skill from, distill into a skill, turn this into a skill, encyclopedia skill, knowledge extraction, distill from course, distill from documentation."
 ---
 
 # Distill — Turn Large Knowledge Into Skills

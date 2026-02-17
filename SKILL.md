@@ -7,7 +7,7 @@ description: "Use when turning large bodies of knowledge (courses, workspaces, d
 
 ## Overview
 
-A methodology for extracting large bodies of knowledge from any source (Tana workspaces, documents, courses, research archives) and structuring them as performant, progressive-disclosure skills that minimize context consumption.
+A methodology for extracting large bodies of knowledge from any source (documents, courses, research archives, knowledge management tools) and structuring them as performant, progressive-disclosure skills that minimize context consumption.
 
 ## When To Use
 
@@ -29,35 +29,36 @@ A methodology for extracting large bodies of knowledge from any source (Tana wor
 **Goal:** Understand the full scope before reading anything in depth.
 
 1. **Identify the source type** and how to access it:
-   - Tana workspace → `list_workspaces`, `read_node` (home node, maxDepth 2)
-   - Documents/files → `Glob` for structure, `Read` for table of contents
-   - Web content → `WebFetch` for sitemap/index pages
+   - Local files/folders → list directory structure, read tables of contents
+   - Web content → fetch sitemap or index pages
+   - Knowledge management tools → use their available API/MCP tools to browse top-level structure
 2. **Map the top-level structure** — sections, lessons, chapters, categories
 3. **Estimate scope** — count top-level topics to plan extraction parallelism
-4. **List available tags/metadata** if the source supports it (Tana: `list_tags`)
+4. **List available tags/metadata** if the source supports structured metadata
 
 ### Phase 2: Parallel Extraction
 
 **Goal:** Read everything. Do not summarize yet.
 
 1. **Dispatch parallel agents** — one per major section/lesson/chapter
-   - Use `Task` tool with `subagent_type: general-purpose` and `run_in_background: true`
-   - Each agent reads all nodes/sections in its assigned area at maximum depth
+   - Use whatever background task/subagent mechanism your environment supports (Claude Code: `task` with `--background`, OpenClaw: `sessions_spawn`, or simply sequential reads if parallelism isn't available)
+   - Each agent reads all content in its assigned area at maximum depth
    - Instruct agents to return ALL content — every detail, framework, definition, example
    - Explicitly tell agents: "Do not summarize or abbreviate"
-2. **Handle external links** — if content references published URLs or templates, use `WebFetch` to capture those too
+2. **Handle external links** — if content references published URLs or templates, fetch and capture those too
 3. **Wait for all agents** — do not start compiling until extraction is complete
 
 **Parallelism guidance:**
 - Group by natural boundaries (lessons, chapters, sections)
 - Aim for 4-8 parallel agents for typical course/workspace size
 - Each agent should handle a coherent chunk (not arbitrary splits)
+- If parallelism isn't available, extract sequentially — the methodology still works, just slower
 
 ### Phase 3: Identify Themes
 
 **Goal:** Find the natural thematic groupings across all extracted content.
 
-1. **Read all agent outputs**
+1. **Read all agent outputs** (or all extracted content if done sequentially)
 2. **Identify frameworks, concepts, and standalone ideas** across all content
 3. **Group thematically, not chronologically** — ask:
    - What topics would a user ask about together?
@@ -126,14 +127,37 @@ Map topics back to original sources (lessons, chapters, etc.)
 - Include: full framework descriptions, all steps/components, named examples, key quotes
 - Do NOT include: redundant overviews, cross-references to other ref files, meta-commentary
 
+**Example reference file (`ref/core-frameworks.md`):**
+
+```markdown
+# Core Frameworks
+
+## Framework Name
+**What it is:** One-sentence definition.
+
+**Components:**
+1. Component A — explanation
+2. Component B — explanation
+3. Component C — explanation
+
+**When to use:** Practical guidance on application.
+
+**Example:** Concrete illustration of the framework in action.
+
+---
+
+## Another Framework
+...
+```
+
 ### Phase 5: Verify and Register
 
-1. **Check the skill appears** in the available skills list (it should auto-register from `~/.claude/skills/`)
+1. **Check the skill loads** — confirm the SKILL.md is in a location your agent discovers (project `.claude/skills/`, `~/.claude/skills/`, or equivalent)
 2. **Test a few queries mentally:**
-   - "What are SUE scores?" → Quick Reference Card has one-liner; ref file has full detail
-   - "Explain the DORA method" → routing table points to correct file
-   - "What was covered in Lesson 3?" → Source Index answers directly
-3. **Update any project CLAUDE.md** files that referenced the old monolithic approach
+   - Can a specific concept question be answered from the Quick Reference Card alone?
+   - Does the routing table point to the right file for each topic?
+   - Is any single ref file doing too much?
+3. **Update any project configuration** that referenced the old monolithic approach
 
 ## File Size Guidelines
 
@@ -147,21 +171,20 @@ If a ref file exceeds 4KB, consider splitting it. If SKILL.md exceeds 5KB, the q
 
 ## Adapting to Different Source Types
 
-### Tana Workspaces
-- `read_node` with `maxDepth: 2` on home node for structure
-- `read_node` with `maxDepth: 5` on content nodes for detail
-- `list_tags` and `get_tag_schema` for metadata
-- Content is hierarchical — good for parallel extraction by top-level node
-
-### Document Collections
-- `Glob` for file listing, `Read` for content
-- Group by directory structure or document type
+### Local Documents
+- List files and directories for structure
+- Read files for content — group by directory or document type
 - Watch for cross-references between documents
 
 ### Web Sources
-- `WebFetch` for individual pages
+- Fetch individual pages for content
 - Start from index/sitemap pages
 - Some content may be behind auth — note gaps
+
+### Knowledge Management Tools (Tana, Notion, Obsidian, etc.)
+- Use their API or MCP tools to browse structure first
+- Extract at maximum depth per section
+- Leverage tags/metadata for thematic grouping
 
 ### Conversations / Transcripts
 - Extract frameworks and named concepts (not dialogue)
